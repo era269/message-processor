@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['7.3', '7.4', '8.0']
+        phpunit-versions: ['latest']
+        phpstan-versions: ['latest']
+        include:
+          - php-versions: '7.1'
+            phpunit-versions: '7.5.20'
+            phpstan-versions: ['latest']
+          - php-versions: '7.2'
+            phpunit-versions: '8.5.15'
+            phpstan-versions: ['latest']
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: xdebug
+          tools: composer:v2, phpunit:${{ matrix.phpunit-versions }}, phpstan:${{ matrix.phpstan-versions }}
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-progress --no-dev
+
+      - name: phpStan
+        run: phpstan analyse
+
+      - name: phpUnit
+        run: phpunit --coverage-clover clover.xml --bootstrap="./tests/bootstrap.php" --whitelist src tests
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1.3.2
