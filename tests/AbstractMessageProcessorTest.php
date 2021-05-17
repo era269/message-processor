@@ -86,7 +86,7 @@ class AbstractMessageProcessorTest extends TestCase
         $this->processor->process($this->message);
     }
 
-    public function testProcessFailByTooManyMathods(): void
+    public function testProcessFailByTooManyMethods(): void
     {
         $methodMap = $this->createMock(MethodMapInterface::class);
         $methods = ['method1', 'method2'];
@@ -108,6 +108,12 @@ class AbstractMessageProcessorTest extends TestCase
         $this->processor->setCache(
             $this->createMock(CacheInterface::class)
         );
+        $this->expectException(LogicException::class);
+        $this->processor->process($this->message);
+    }
+
+    public function testNoCacheAndNoMethodMapProcessFail(): void
+    {
         $this->expectException(LogicException::class);
         $this->processor->process($this->message);
     }
