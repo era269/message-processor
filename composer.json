@@ -1,0 +1,43 @@
+{
+    "name": "era269/message-processor",
+    "type": "library",
+    "description": "Functionality of automated method choosing for message processing",
+    "keywords": ["OOP","DDD","Message"],
+    "license": "MIT",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.0|^7.1",
+        "cache/array-adapter": "^1.1",
+        "era269/method-map": "^0.1.0",
+        "psr/simple-cache": "^1.0"
+    },
+    "require-dev": {
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan": "^0.12.85",
+        "phpstan/phpstan-phpunit": "^0.12.18",
+        "phpunit/phpunit": "^9.5"
+    },
+    "authors": [
+        {
+            "name": "Yuriy Antonuyk",
+            "email": "era269@ukr.net"
+        }
+    ],
+    "config": {
+        "platform": {
+            "php": "8.0"
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Era269\\MessageProcessor\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Era269\\MessageProcessor\\Tests\\": "tests"
+        }
+    }
+}
