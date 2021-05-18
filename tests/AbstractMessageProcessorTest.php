@@ -71,6 +71,20 @@ class AbstractMessageProcessorTest extends TestCase
         );
     }
 
+    public function testProcess(): void
+    {
+        $processor = new class extends AbstractMessageProcessor{
+            public function processMessage(MessageInterface $message): MessageInterface
+            {
+                return $message;
+            }
+        };
+        self::assertInstanceOf(
+            get_class($this->message),
+            $processor->process($this->message)
+        );
+    }
+
     public function testProcessFailByNoProcessingMethod(): void
     {
         $methodMap = $this->createMock(MethodMapInterface::class);

@@ -70,11 +70,11 @@ trait CanGetMethodNameByMessageTrait
         if (!isset($this->methodMap)) {
             $this->methodMap = new MethodMapCacheDecorator(
                 new MethodMapCollectionDecorator(
-                    new ClassNameMethodMap(self::class),
-                    new InterfaceMethodMap(self::class)
+                    new ClassNameMethodMap(static::class),
+                    new InterfaceMethodMap(static::class)
                 ),
                 $this->getCache(),
-                self::class
+                static::class
             );
         }
 
