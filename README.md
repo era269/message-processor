@@ -6,4 +6,4 @@ Functionality of automated method choosing for message processing
 
 ## How To Use
 extend \Era269\MessageProcessor\AbstractMessageProcessor
-`or` use \Era269\MessageProcessor\Traits\CanProcessMessageTrait
+`or` use \Era269\MessageProcessor\Traits\CanGetMethodNameByMessageTrait + implement method process

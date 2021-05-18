@@ -5,18 +5,16 @@ declare(strict_types=1);
 namespace Era269\MessageProcessor\Traits;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
+use Era269\MessageProcessor\MessageInterface;
 use Era269\MethodMap\ClassNameMethodMap;
 use Era269\MethodMap\InterfaceMethodMap;
 use Era269\MethodMap\MethodMapCacheDecorator;
 use Era269\MethodMap\MethodMapCollectionDecorator;
-use Era269\MessageProcessor\Message\NullMessage;
-use Era269\MessageProcessor\MessageInterface;
 use Era269\MethodMap\MethodMapInterface;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
-use RuntimeException;
 
-trait CanProcessMessageTrait
+trait CanGetMethodNameByMessageTrait
 {
     /**
      * @var MethodMapInterface
@@ -40,12 +38,31 @@ trait CanProcessMessageTrait
         $this->cache = $cache;
     }
 
-    private function getCache(): CacheInterface
+    private function getMethodName(MessageInterface $message): string
     {
-        if (!isset($this->cache)) {
-            $this->cache = new ArrayCachePool();
-        }
-        return $this->cache;
+        $methodNames = $this->getMethodNames($message);
+
+        $this->throwExceptionIfNoProcessorFound($methodNames, $message);
+        $this->throwExceptionIfMoreThanOneProcessorFound($methodNames, $message);
+
+        return $methodNames[0];
+    }
+
+    /**
+     * @param MessageInterface $message
+     *
+     * @return string[]
+     */
+    private function getMethodNames(MessageInterface $message): array
+    {
+        $methodNames = $this->getMethodMap()->getMethodNames($message);
+
+        return array_filter(
+            $methodNames,
+            function (string $item) {
+                return 'process' !== $item;
+            }
+        );
     }
 
     private function getMethodMap(): MethodMapInterface
@@ -60,18 +77,17 @@ trait CanProcessMessageTrait
                 self::class
             );
         }
+
         return $this->methodMap;
     }
 
-    /**
-     * @throws RuntimeException
-     */
-    final public function process(MessageInterface $message): MessageInterface
+    private function getCache(): CacheInterface
     {
-        $methodName = $this->getMethodName($message);
+        if (!isset($this->cache)) {
+            $this->cache = new ArrayCachePool();
+        }
 
-        return $this->$methodName($message)
-            ?? new NullMessage();
+        return $this->cache;
     }
 
     /**
@@ -101,32 +117,5 @@ trait CanProcessMessageTrait
                 get_class($message)
             ));
         }
-    }
-
-    /**
-     * @param MessageInterface $message
-     *
-     * @return string[]
-     */
-    private function getMethodNames(MessageInterface $message): array
-    {
-        $methodNames = $this->getMethodMap()->getMethodNames($message);
-
-        return array_filter(
-            $methodNames,
-            function (string $item) {
-                return 'process' !== $item;
-            }
-        );
-    }
-
-    private function getMethodName(MessageInterface $message): string
-    {
-        $methodNames = $this->getMethodNames($message);
-
-        $this->throwExceptionIfNoProcessorFound($methodNames, $message);
-        $this->throwExceptionIfMoreThanOneProcessorFound($methodNames, $message);
-
-        return $methodNames[0];
     }
 }
