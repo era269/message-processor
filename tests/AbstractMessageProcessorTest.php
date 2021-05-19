@@ -150,24 +150,25 @@ class AbstractMessageProcessorTest extends TestCase
     {
         $event = new FakeEvent();
         $object = new class extends AbstractMessageProcessor {
-            public function applyPublic(EventInterface $event): FakeEvent
+            public function applyPublic(EventInterface $event): void
             {
-                return $this->apply($event);
+                $this->apply($event);
             }
 
-            protected function applyFakeEvent(FakeEvent $event): FakeEvent
+            protected function applyFakeEvent(FakeEvent $event): void
             {
-                return $event;
+
             }
         };
         $applyEventMap = $this->createMock(MethodMapInterface::class);
         $applyEventMap
+            ->expects($this->once())
             ->method('getMethodNames')
             ->willReturn(['applyFakeEvent']);
         $object->setApplyEventMap(
             $applyEventMap
         );
-        self::assertSame($event, $object->applyPublic($event));
+        $object->applyPublic($event);
     }
 
     public function testApplyFailNoApplyMethod(): void
