@@ -146,6 +146,28 @@ class AbstractMessageProcessorTest extends TestCase
         $this->processor->process($this->message);
     }
 
+    public function testApplyMethod(): void
+    {
+        $event = new FakeEvent();
+        $object = new class extends AbstractMessageProcessor {
+            public function applyPublic(EventInterface $event): void
+            {
+                $this->apply($event);
+            }
+
+            protected function applyFakeEvent(FakeEvent $event): void
+            {
+
+            }
+        };
+        $object->setApplyEventMap(
+            $this->createMock(MethodMapInterface::class)
+        );
+        $this->expectIncorrectInternalMethodCallException($event);
+
+        $object->applyPublic($event);
+    }
+
     public function testApplyFailNoApplyMethod(): void
     {
         $event = $this->createMock(EventInterface::class);
