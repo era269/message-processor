@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Era269\MessageProcessor\Tests;
 
 use Era269\MessageProcessor\AbstractMessageProcessor;
+use Era269\MessageProcessor\Message\EventInterface;
 use Era269\MessageProcessor\Message\NullMessage;
 use Era269\MessageProcessor\MessageInterface;
 use Era269\MethodMap\MethodMapInterface;
@@ -24,13 +25,6 @@ class AbstractMessageProcessorTest extends TestCase
      */
     private $processor;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->message = $this->createMock(MessageInterface::class);
-        $this->processor = $this->getMockForAbstractClass(AbstractMessageProcessor::class);
-    }
-
     public function testProcessWithNullMessageReturn(): void
     {
         $methodMap = $this->createMock(MethodMapInterface::class);
@@ -38,7 +32,7 @@ class AbstractMessageProcessorTest extends TestCase
             ->method('getMethodNames')
             ->willReturn(['processMessage']);
 
-        $processor = new class extends AbstractMessageProcessor{
+        $processor = new class extends AbstractMessageProcessor {
             /**
              * @return null
              */
@@ -58,7 +52,7 @@ class AbstractMessageProcessorTest extends TestCase
             ->method('getMethodNames')
             ->willReturn(['processMessage']);
 
-        $processor = new class extends AbstractMessageProcessor{
+        $processor = new class extends AbstractMessageProcessor {
             public function processMessage(MessageInterface $message): MessageInterface
             {
                 return $message;
@@ -73,7 +67,7 @@ class AbstractMessageProcessorTest extends TestCase
 
     public function testProcess(): void
     {
-        $processor = new class extends AbstractMessageProcessor{
+        $processor = new class extends AbstractMessageProcessor {
             public function processMessage(MessageInterface $message): MessageInterface
             {
                 return $message;
@@ -92,12 +86,16 @@ class AbstractMessageProcessorTest extends TestCase
             ->method('getMethodNames')
             ->willReturn([]);
         $this->processor->setMethodMap($methodMap);
-        $this->expectExceptionMessage(sprintf(
-            'Incorrect internal method call: "%s" doesn\'t know how to process the message "%s"',
-            get_class($this->processor),
-            get_class($this->message)
-        ));
+        $this->expectIncorrectInternalMethodCallException($this->message);
         $this->processor->process($this->message);
+    }
+
+    private function expectIncorrectInternalMethodCallException(MessageInterface $message): void
+    {
+        $this->expectExceptionMessage(sprintf(
+            'Incorrect internal method call: object doesn\'t know how to process the message "%s"',
+            get_class($message)
+        ));
     }
 
     public function testProcessFailByTooManyMethods(): void
@@ -108,13 +106,20 @@ class AbstractMessageProcessorTest extends TestCase
             ->method('getMethodNames')
             ->willReturn($methods);
         $this->processor->setMethodMap($methodMap);
-        $this->expectExceptionMessage(sprintf(
-            'Controversial internal method call in "%s". More than ine method [%s] can process "%s"',
-            get_class($this->processor),
-            implode(',', $methods),
-            get_class($this->message)
-        ));
+        $this->expectControversialInternalMethodCallException($this->message, $methods);
         $this->processor->process($this->message);
+    }
+
+    /**
+     * @param string[] $methods
+     */
+    private function expectControversialInternalMethodCallException(MessageInterface $message, array $methods): void
+    {
+        $this->expectExceptionMessage(sprintf(
+            'Controversial internal method call. More than one method [%s] can process "%s"',
+            implode(',', $methods),
+            get_class($message)
+        ));
     }
 
     public function testSetCache(): void
@@ -140,4 +145,52 @@ class AbstractMessageProcessorTest extends TestCase
         $this->expectException(LogicException::class);
         $this->processor->process($this->message);
     }
+
+    public function testApplyFailNoApplyMethod(): void
+    {
+        $event = $this->createMock(EventInterface::class);
+        $object = new class extends AbstractMessageProcessor {
+            public function applyPublic(EventInterface $event): void
+            {
+                $this->apply($event);
+            }
+        };
+        $this->expectIncorrectInternalMethodCallException($event);
+
+        $object->applyPublic($event);
+    }
+
+    public function testApplyFailMoreThanOneApplyMethod(): void
+    {
+        $event = new FakeEvent();
+        $object = new class extends AbstractMessageProcessor {
+            public function applyPublic(EventInterface $event): void
+            {
+                $this->apply($event);
+            }
+
+            protected function applyEvent1(FakeEvent $event)
+            {
+            }
+
+            protected function applyEvent2(FakeEvent $event)
+            {
+            }
+        };
+
+        $this->expectControversialInternalMethodCallException($event, ['applyEvent1', 'applyEvent2']);
+
+        $object->applyPublic($event);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->message = $this->createMock(MessageInterface::class);
+        $this->processor = $this->getMockForAbstractClass(AbstractMessageProcessor::class);
+    }
+}
+
+class FakeEvent implements EventInterface
+{
 }
