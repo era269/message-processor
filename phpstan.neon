@@ -2,3 +2,11 @@ parameters:
     level: 8
     paths:
         - src
+    ignoreErrors:
+        -
+            message: '/Method Era269\\MessageProcessor\\AbstractMessageProcessor::getMethodName\(\) should return string but returns string\|false./'
+            path: ./src/Traits/CanGetMethodNameByMessageTrait.php
+        -
+            message: '/Method Era269\\MessageProcessor\\AbstractMessageProcessor::getApplyEventMethodName\(\) should return string but returns string\|false./'
+            path: ./src/Traits/CanGetMethodNameByEventTrait.php
+

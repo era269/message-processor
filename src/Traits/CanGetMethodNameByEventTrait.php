@@ -32,7 +32,7 @@ trait CanGetMethodNameByEventTrait
     {
         return current(
             $this->getApplyEventMap()->getMethodNames($event)
-        ) ?: '';
+        );
     }
 
     private function getApplyEventMap(): MethodMapInterface

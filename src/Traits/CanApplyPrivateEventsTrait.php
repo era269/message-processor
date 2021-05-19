@@ -20,6 +20,6 @@ trait CanApplyPrivateEventsTrait
     private function applyThat(EventInterface $event): void
     {
         $methodName = $this->getApplyEventMethodName($event);
-        $this->{$methodName}($event);
+        $this->$methodName($event);
     }
 }
