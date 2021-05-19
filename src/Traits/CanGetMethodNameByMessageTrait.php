@@ -48,7 +48,7 @@ trait CanGetMethodNameByMessageTrait
     {
         return current(
             $this->getMethodMap()->getMethodNames($message)
-        );
+        ) ?: '';
     }
 
     private function getMethodMap(): MethodMapInterface

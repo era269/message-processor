@@ -19,7 +19,7 @@ trait CanProcessMessage
     {
         $methodName = $this->getMethodName($message);
 
-        return $this->$methodName($message)
+        return $this->{$methodName}($message)
             ?? new NullMessage();
     }
 }
