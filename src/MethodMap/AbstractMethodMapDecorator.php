@@ -31,9 +31,8 @@ abstract class AbstractMethodMapDecorator implements MethodMapInterface
 
     /**
      * @param string[] $methodNames
-     * @param object $message
      *
      * @return string[]
      */
-    abstract protected function getDecorated(array $methodNames, $message): array;
+    abstract protected function getDecorated(array $methodNames, object $message): array;
 }

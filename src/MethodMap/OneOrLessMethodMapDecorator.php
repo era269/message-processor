@@ -12,7 +12,7 @@ final class OneOrLessMethodMapDecorator extends AbstractMethodMapDecorator imple
     /**
      * @inheritDoc
      */
-    protected function getDecorated(array $methodNames, $message): array
+    protected function getDecorated(array $methodNames, object $message): array
     {
         if (count($methodNames) > 1) {
             throw new LogicException(sprintf(

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Era269\MessageProcessor\Tests;
 
 use Era269\MessageProcessor\AbstractMessageProcessor;
-use Era269\MessageProcessor\Message\EventInterface;
 use Era269\MessageProcessor\Message\NullMessage;
 use Era269\MessageProcessor\MessageInterface;
 use Era269\MethodMap\MethodMapInterface;
@@ -65,7 +64,7 @@ class AbstractMessageProcessorTest extends TestCase
             {
             }
 
-            public function applyPublic(EventInterface $event): void
+            public function applyPublic(object $event): void
             {
                 $this->apply($event);
             }
@@ -116,7 +115,7 @@ class AbstractMessageProcessorTest extends TestCase
         $this->processor->process($this->message);
     }
 
-    private function expectIncorrectInternalMethodCallException(MessageInterface $message): void
+    private function expectIncorrectInternalMethodCallException(object $message): void
     {
         $this->expectExceptionMessage(sprintf(
             'Incorrect internal method call: object doesn\'t know how to process the message "%s"',
@@ -136,7 +135,7 @@ class AbstractMessageProcessorTest extends TestCase
     /**
      * @param string[] $methods
      */
-    private function expectControversialInternalMethodCallException(MessageInterface $message, array $methods): void
+    private function expectControversialInternalMethodCallException(object $message, array $methods): void
     {
         $this->expectExceptionMessage(sprintf(
             'Controversial internal method call. More than one method [%s] can process "%s"',
@@ -177,7 +176,7 @@ class AbstractMessageProcessorTest extends TestCase
 
     public function testApplyFailNoApplyMethod(): void
     {
-        $event = $this->createMock(EventInterface::class);
+        $event = new \stdClass();
         $processor = $this->createProcessor();
         $this->expectIncorrectInternalMethodCallException($event);
 
@@ -188,7 +187,7 @@ class AbstractMessageProcessorTest extends TestCase
     {
         $event = new FakeEvent();
         $processor = new class ($this->eventDispatcher) extends AbstractMessageProcessor {
-            public function applyPublic(EventInterface $event): void
+            public function applyPublic(MessageInterface $event): void
             {
                 $this->apply($event);
             }
@@ -216,6 +215,6 @@ class AbstractMessageProcessorTest extends TestCase
     }
 }
 
-class FakeEvent implements EventInterface
+class FakeEvent implements MessageInterface
 {
 }

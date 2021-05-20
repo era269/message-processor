@@ -18,7 +18,7 @@ trait CanProcessMessage
     /**
      * @throws RuntimeException
      */
-    public function process(MessageInterface $message): MessageInterface
+    public function process(MessageInterface $message): object
     {
         $messageCollection = $this->processMessage($message);
 

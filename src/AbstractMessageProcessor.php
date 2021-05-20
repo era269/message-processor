@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Era269\MessageProcessor;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
-use Era269\MessageProcessor\Message\EventInterface;
 use Era269\MessageProcessor\MethodMap\ExcludeMethodMapDecorator;
 use Era269\MessageProcessor\MethodMap\OneOrLessMethodMapDecorator;
 use Era269\MessageProcessor\MethodMap\OneOrMoreMethodMapDecorator;
@@ -73,7 +72,7 @@ abstract class AbstractMessageProcessor implements
         );
     }
 
-    protected function applyAndPublish(EventInterface ...$events): void
+    protected function applyAndPublish(object ...$events): void
     {
         foreach ($events as $event) {
             $this->applyThat($event);
