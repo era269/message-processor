@@ -25,7 +25,7 @@ final class ExcludeMethodMapDecorator extends AbstractMethodMapDecorator impleme
     /**
      * @inheritDoc
      */
-    protected function getDecorated(array $methodNames, $message): array
+    protected function getDecorated(array $methodNames, object $message): array
     {
         return array_diff(
             $methodNames,

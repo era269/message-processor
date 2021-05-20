@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Era269\MessageProcessor\Traits;
+namespace Era269\MessageProcessor\Traits\Aware;
 
-use Cache\Adapter\PHPArray\ArrayCachePool;
+use Era269\MessageProcessor\Exception\ParameterIsNotSetLogicException;
 use Psr\SimpleCache\CacheInterface;
 
 trait CacheAwareTrait
@@ -19,10 +19,10 @@ trait CacheAwareTrait
         $this->cache = $cache;
     }
 
-    private function getCache(): CacheInterface
+    protected function getCache(): CacheInterface
     {
         if (!isset($this->cache)) {
-            $this->cache = new ArrayCachePool();
+            throw new ParameterIsNotSetLogicException(static::class, 'cache');
         }
         return $this->cache;
     }
