@@ -24,7 +24,7 @@ class MessageCollectionTest extends TestCase
         foreach ($this->messages as $message) {
             $this->messageCollection->attach($message);
         }
-        foreach ($this->messageCollection as $item) {
+        foreach ($this->messageCollection as $key => $item) {
             self::assertInstanceOf(MessageInterface::class, $item);
         }
         self::assertEquals(count($this->messages) + 1, count($this->messageCollection));
