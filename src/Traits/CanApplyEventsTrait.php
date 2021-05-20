@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Era269\MessageProcessor\Traits;
 
 use Era269\MessageProcessor\Message\EventInterface;
+use Era269\MessageProcessor\Traits\Aware\ApplyEventMethodMapAwareTrait;
 
-trait CanApplyPrivateEventsTrait
+trait CanApplyEventsTrait
 {
-    use CanGetMethodNameByEventTrait;
+    use ApplyEventMethodMapAwareTrait;
 
     protected function apply(EventInterface ...$events): void
     {
@@ -19,7 +20,10 @@ trait CanApplyPrivateEventsTrait
 
     private function applyThat(EventInterface $event): void
     {
-        $methodName = $this->getApplyEventMethodName($event);
-        $this->{$methodName}($event);
+        $methodNames = $this->getApplyEventMethodMap()
+            ->getMethodNames($event);
+        foreach ($methodNames as $methodName) {
+            $this->{$methodName}($event);
+        }
     }
 }
