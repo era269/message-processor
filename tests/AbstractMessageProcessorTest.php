@@ -66,7 +66,7 @@ class AbstractMessageProcessorTest extends TestCase
 
             public function applyPublic(object $event): void
             {
-                $this->apply($event);
+                $this->applyAndPublish($event);
             }
 
             protected function applyFakeEvent(FakeEvent $event): void
