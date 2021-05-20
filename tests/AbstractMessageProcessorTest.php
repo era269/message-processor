@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Era269\MessageProcessor\Tests;
 
 use Era269\MessageProcessor\AbstractMessageProcessor;
+use Era269\MessageProcessor\Message\MessageCollectionInterface;
 use Era269\MessageProcessor\Message\NullMessage;
 use Era269\MessageProcessor\MessageInterface;
 use Era269\MethodMap\MethodMapInterface;
@@ -46,6 +47,29 @@ class AbstractMessageProcessorTest extends TestCase
         self::assertInstanceOf(NullMessage::class, $processor->process(new FakeEvent()));
     }
 
+    public function testProcessWithZeroMethodsFound(): void
+    {
+        $methodMap = $this->createMock(MethodMapInterface::class);
+        $methodMap
+            ->method('getMethodNames')
+            ->willReturn([]);
+
+        $this->processor->setProcessMessageMethodMap($methodMap);
+        self::assertInstanceOf(NullMessage::class, $this->processor->process(new FakeEvent()));
+    }
+
+    public function testProcessWithMoreThanOneMethodsFound(): void
+    {
+        $methodMap = $this->createMock(MethodMapInterface::class);
+        $methodMap
+            ->method('getMethodNames')
+            ->willReturn(self::PROCESS_CONTROVERSIAL_MESSAGE_METHOD_NAMES);
+
+        $processor = $this->createProcessor();
+        $processor->setProcessMessageMethodMap($methodMap);
+        self::assertInstanceOf(MessageCollectionInterface::class, $processor->process(new FakeEvent()));
+    }
+
     /**
      * @return AbstractMessageProcessor
      */
@@ -67,6 +91,8 @@ class AbstractMessageProcessorTest extends TestCase
             public function applyPublic(object $event): void
             {
                 $this->applyAndPublish($event);
+                $this->apply($event);
+                $this->publish($event);
             }
 
             protected function applyFakeEvent(FakeEvent $event): void
@@ -165,7 +191,7 @@ class AbstractMessageProcessorTest extends TestCase
         $processor = $this->createProcessor();
         $applyEventMap = $this->createMock(MethodMapInterface::class);
         $applyEventMap
-            ->expects($this->once())
+            ->expects($this->atLeastOnce())
             ->method('getMethodNames')
             ->willReturn(['applyFakeEvent']);
         $processor->setApplyEventMethodMap(
